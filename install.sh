@@ -58,31 +58,64 @@ if [ -f /etc/os-release ]; then
 fi
 
 # 2. Package installs
+enable_debian_extra_repos() {
+    echo -e "${BLUE}[*] Checking Debian contrib and non-free components...${NC}"
+    # Check DEB822 style sources format (Debian 12+)
+    if [ -f /etc/apt/sources.list.d/debian.sources ]; then
+        if $SUDO grep -q "Components:" /etc/apt/sources.list.d/debian.sources; then
+            if ! $SUDO grep -q "contrib" /etc/apt/sources.list.d/debian.sources; then
+                echo -e "${BLUE}[*] Adding contrib, non-free, and non-free-firmware to debian.sources components...${NC}"
+                $SUDO sed -i 's/Components: main$/Components: main contrib non-free non-free-firmware/g' /etc/apt/sources.list.d/debian.sources
+                $SUDO sed -i 's/Components: main /Components: main contrib non-free non-free-firmware /g' /etc/apt/sources.list.d/debian.sources
+            fi
+        fi
+    fi
+    # Check traditional sources.list format
+    if [ -f /etc/apt/sources.list ]; then
+        if ! $SUDO grep -q "contrib" /etc/apt/sources.list; then
+            echo -e "${BLUE}[*] Adding contrib, non-free, and non-free-firmware to sources.list...${NC}"
+            $SUDO sed -i 's/main$/main contrib non-free non-free-firmware/g' /etc/apt/sources.list
+            $SUDO sed -i 's/main /main contrib non-free non-free-firmware /g' /etc/apt/sources.list
+        fi
+    fi
+}
+
+enable_debian_extra_repos
+
 echo -e "${BLUE}[*] Triggering APT repositories update...${NC}"
 $SUDO apt-get update -y || echo -e "${YELLOW}[!] APT Update failed. Proceeding anyway...${NC}"
 
-DEB_DEPS=(
+CORE_DEPS=(
     python3-pip
     python3-venv
     samba
     nfs-kernel-server
     tgt
-    libvirt-daemon-system
-    python3-libvirt
     nodejs
     npm
-    mdadm
-    zfsutils-linux
     avahi-daemon
     libnss-mdns
 )
 
-echo -e "${BLUE}[*] Installing system dependencies via APT...${NC}"
-# Use non-interactive mode to prevent blocking prompts
-DEBIAN_FRONTEND=noninteractive $SUDO apt-get install -y "${DEB_DEPS[@]}" || {
-    echo -e "${RED}[-] Warning: Some packages failed to install via apt.${NC}"
-    echo -e "${YELLOW}[!] Virtualization or storage packages may not be present on this guest OS.${NC}"
+echo -e "${BLUE}[*] Installing core system dependencies via APT...${NC}"
+DEBIAN_FRONTEND=noninteractive $SUDO apt-get install -y "${CORE_DEPS[@]}" || {
+    echo -e "${RED}[-] Error: Failed to install core system dependencies.${NC}"
+    exit 1
 }
+
+OPTIONAL_DEPS=(
+    mdadm
+    zfsutils-linux
+    libvirt-daemon-system
+    python3-libvirt
+)
+
+for pkg in "${OPTIONAL_DEPS[@]}"; do
+    echo -e "${BLUE}[*] Installing package: $pkg...${NC}"
+    DEBIAN_FRONTEND=noninteractive $SUDO apt-get install -y "$pkg" || {
+        echo -e "${YELLOW}[!] Warning: Optional package '$pkg' failed to install. Continuing...${NC}"
+    }
+done
 
 # 3. Setup Python virtual environment
 echo -e "${BLUE}[*] Building Python virtual environment...${NC}"
