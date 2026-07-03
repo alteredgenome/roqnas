@@ -234,6 +234,27 @@ h1, h2, h3, h4 {
 .border-indigo-500\/20 { border-color: rgba(99, 102, 241, 0.2); }
 .border-cyan-500\/20 { border-color: rgba(34, 211, 238, 0.2); }
 
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-color: rgba(2, 6, 23, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+header.scrolled {
+  background-color: rgba(2, 6, 23, 0.85);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
 .sticky { position: sticky; }
 .fixed { position: fixed; }
 .top-0 { top: 0; }

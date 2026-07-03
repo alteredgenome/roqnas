@@ -26,11 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Header scroll transition styling
   window.addEventListener('scroll', () => {
     if (window.scrollY > 20) {
-      header.classList.add('bg-slate-950/90', 'shadow-lg', 'border-b', 'border-white/10');
-      header.classList.remove('bg-slate-950/60', 'border-white/5');
+      header.classList.add('scrolled');
     } else {
-      header.classList.add('bg-slate-950/60', 'border-white/5');
-      header.classList.remove('bg-slate-950/90', 'shadow-lg', 'border-b', 'border-white/10');
+      header.classList.remove('scrolled');
     }
   });
 
