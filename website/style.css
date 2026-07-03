@@ -290,6 +290,8 @@ header.scrolled {
 /* Custom Hero Layout */
 .glass-mockup-wrapper {
   position: relative;
+  width: 100%;
+  max-width: 520px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
   border-radius: 1rem;
   padding: 8px;
