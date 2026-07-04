@@ -28,8 +28,20 @@ fi
 
 # Resolve script directory (absolute path)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-BACKEND_DIR="${SCRIPT_DIR}/backend"
-FRONTEND_DIR="${SCRIPT_DIR}/frontend"
+INSTALL_DIR="/opt/roqnas"
+
+# Copy files to /opt/roqnas if running from another location (like /tmp)
+if [ "${SCRIPT_DIR}" != "${INSTALL_DIR}" ]; then
+    echo -e "${BLUE}[*] Staging files to permanent directory ${INSTALL_DIR}...${NC}"
+    $SUDO mkdir -p "${INSTALL_DIR}"
+    $SUDO cp -rf "${SCRIPT_DIR}"/* "${INSTALL_DIR}/" || {
+        echo -e "${RED}[-] Error: Failed to stage installation files to ${INSTALL_DIR}.${NC}"
+        exit 1
+    }
+fi
+
+BACKEND_DIR="${INSTALL_DIR}/backend"
+FRONTEND_DIR="${INSTALL_DIR}/frontend"
 
 # Rename system hostname based on MAC address
 echo -e "${BLUE}[*] Resolving primary interface MAC address for hostname generation...${NC}"
